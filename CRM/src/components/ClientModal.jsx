@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
 
-const ClientModal = ({ onClose, onAddClient }) => {
-  const [formData, setFormData] = useState({
+const ClientModal = ({ onClose, onAddClient, editingClient }) => {
+  const emptyForm = {
     name: "",
     company: "",
     website: "",
@@ -18,7 +18,17 @@ const ClientModal = ({ onClose, onAddClient }) => {
     status: "New",
     followUpDate: "",
     notes: "",
-  });
+  };
+
+  const [formData, setFormData] = useState(editingClient || emptyForm);
+
+  useEffect(() => {
+    if (editingClient) {
+      setFormData(editingClient);
+    } else {
+      setFormData(emptyForm);
+    }
+  }, [editingClient]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -37,23 +47,24 @@ const ClientModal = ({ onClose, onAddClient }) => {
       return;
     }
 
-    onAddClient(formData);
+    onAddClient(formData, editingClient?.id);
     onClose();
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/30 px-4 py-6 backdrop-blur-sm">
       <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-xl">
-
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
           <div>
             <h2 className="text-xl font-semibold text-slate-800">
-              Add New Client
+              {editingClient ? "Edit Client" : "Add New Client"}
             </h2>
 
             <p className="mt-1 text-sm text-slate-500">
-              Add the details of your potential client.
+              {editingClient
+                ? "Update this client's information."
+                : "Add the details of your potential client."}
             </p>
           </div>
 
@@ -68,10 +79,8 @@ const ClientModal = ({ onClose, onAddClient }) => {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5 px-6 py-6">
-
           {/* Name + Company */}
           <div className="grid gap-5 sm:grid-cols-2">
-
             <div>
               <label className="mb-2 block text-sm font-medium text-slate-700">
                 Name *
@@ -101,12 +110,10 @@ const ClientModal = ({ onClose, onAddClient }) => {
                 className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
               />
             </div>
-
           </div>
 
           {/* Website + WhatsApp */}
           <div className="grid gap-5 sm:grid-cols-2">
-
             <div>
               <label className="mb-2 block text-sm font-medium text-slate-700">
                 Website
@@ -136,7 +143,6 @@ const ClientModal = ({ onClose, onAddClient }) => {
                 className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
               />
             </div>
-
           </div>
 
           {/* Email */}
@@ -157,7 +163,6 @@ const ClientModal = ({ onClose, onAddClient }) => {
 
           {/* Social Links */}
           <div className="grid gap-5 sm:grid-cols-2">
-
             <div>
               <label className="mb-2 block text-sm font-medium text-slate-700">
                 LinkedIn
@@ -187,7 +192,6 @@ const ClientModal = ({ onClose, onAddClient }) => {
                 className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
               />
             </div>
-
           </div>
 
           {/* Facebook */}
@@ -208,7 +212,6 @@ const ClientModal = ({ onClose, onAddClient }) => {
 
           {/* Business Type + Location */}
           <div className="grid gap-5 sm:grid-cols-2">
-
             <div>
               <label className="mb-2 block text-sm font-medium text-slate-700">
                 Business Type
@@ -238,12 +241,10 @@ const ClientModal = ({ onClose, onAddClient }) => {
                 className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
               />
             </div>
-
           </div>
 
           {/* Service + Channel */}
           <div className="grid gap-5 sm:grid-cols-2">
-
             <div>
               <label className="mb-2 block text-sm font-medium text-slate-700">
                 Service
@@ -284,12 +285,10 @@ const ClientModal = ({ onClose, onAddClient }) => {
                 <option value="Email">Email</option>
               </select>
             </div>
-
           </div>
 
           {/* Status + Follow Up */}
           <div className="grid gap-5 sm:grid-cols-2">
-
             <div>
               <label className="mb-2 block text-sm font-medium text-slate-700">
                 Status
@@ -323,7 +322,6 @@ const ClientModal = ({ onClose, onAddClient }) => {
                 className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
               />
             </div>
-
           </div>
 
           {/* Notes */}
@@ -344,7 +342,6 @@ const ClientModal = ({ onClose, onAddClient }) => {
 
           {/* Buttons */}
           <div className="flex justify-end gap-3 border-t border-slate-100 pt-5">
-
             <button
               type="button"
               onClick={onClose}
@@ -357,11 +354,9 @@ const ClientModal = ({ onClose, onAddClient }) => {
               type="submit"
               className="rounded-xl bg-indigo-500 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-600"
             >
-              Add Client
+              {editingClient ? "Update Client" : "Add Client"}
             </button>
-
           </div>
-
         </form>
       </div>
     </div>
