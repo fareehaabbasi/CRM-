@@ -8,6 +8,7 @@ import FollowUpSection from "../components/FollowUpSection";
 import useClients from "../hooks/useClients";
 import { supabase } from "../Lib/supabase";
 import Navbar from "../components/Navbar";
+import Swal from "sweetalert2";
 
 const Dashboard = () => {
   const [showModal, setShowModal] = useState(false);
@@ -57,7 +58,11 @@ const Dashboard = () => {
 
       if (error) {
         console.error(error);
-        alert(error.message);
+        Swal.fire({
+          icon: "error",
+          title: "Something went wrong",
+          text: error.message,
+        });
         return;
       }
 
@@ -72,6 +77,13 @@ const Dashboard = () => {
             : client,
         ),
       );
+      Swal.fire({
+        icon: "success",
+        title: "Client Updated",
+        text: "The client has been updated successfully.",
+        timer: 1800,
+        showConfirmButton: false,
+      });
 
       return;
     }
@@ -101,7 +113,11 @@ const Dashboard = () => {
 
     if (error) {
       console.error(error);
-      alert(error.message);
+      Swal.fire({
+        icon: "error",
+        title: "Something went wrong",
+        text: error.message,
+      });
       return;
     }
 
@@ -127,6 +143,13 @@ const Dashboard = () => {
     };
 
     setClients((prev) => [newClient, ...prev]);
+    Swal.fire({
+      icon: "success",
+      title: "Client Added",
+      text: "The client has been added successfully.",
+      timer: 1800,
+      showConfirmButton: false,
+    });
   };
 
   const handleViewClient = (client) => {
@@ -139,11 +162,17 @@ const Dashboard = () => {
   };
 
   const handleDeleteClient = async (clientId) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this client?",
-    );
+    const result = await Swal.fire({
+      title: "Delete Client?",
+      text: "This action cannot be undone.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, Delete",
+      cancelButtonText: "Cancel",
+      reverseButtons: true,
+    });
 
-    if (!confirmed) return;
+    if (!result.isConfirmed) return;
 
     const { error } = await supabase
       .from("clients")
@@ -152,11 +181,23 @@ const Dashboard = () => {
 
     if (error) {
       console.error(error);
-      alert(error.message);
+      Swal.fire({
+        icon: "error",
+        title: "Something went wrong",
+        text: error.message,
+      });
       return;
     }
 
     setClients((prev) => prev.filter((client) => client.id !== clientId));
+
+    Swal.fire({
+      icon: "success",
+      title: "Client Deleted",
+      text: "The client has been deleted successfully.",
+      timer: 1800,
+      showConfirmButton: false,
+    });
   };
 
   const filteredClients = clients.filter((client) => {
@@ -227,8 +268,6 @@ const Dashboard = () => {
     <div className="min-h-screen bg-slate-100">
       <Navbar />
 
-      {/* baqi Dashboard content */}
-
       {/* Header */}
       <header className="bg-slate-100">
         <div className="mx-auto flex max-w-7xl items-end justify-between px-6 pb-2 pt-8">
@@ -258,60 +297,72 @@ const Dashboard = () => {
       <main className="mx-auto max-w-7xl px-6 py-8">
         {/* Stats */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Total Clients */}
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-500">Total Clients</p>
-                <h2 className="mt-2 text-3xl font-semibold">{totalClients}</h2>
+                <p className="text-sm font-medium text-slate-500">
+                  Total Clients
+                </p>
+
+                <p className="mt-2 text-3xl font-semibold text-slate-800">
+                  {totalClients}
+                </p>
               </div>
 
-              <div className="rounded-xl bg-indigo-50 p-3 text-indigo-500">
-                <Users size={21} />
+              <div className="rounded-xl bg-indigo-50 p-3 text-indigo-600">
+                <Users size={20} />
               </div>
             </div>
           </div>
 
+          {/* Contacted */}
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-500">Contacted</p>
-                <h2 className="mt-2 text-3xl font-semibold">
+                <p className="text-sm font-medium text-slate-500">Contacted</p>
+
+                <p className="mt-2 text-3xl font-semibold text-slate-800">
                   {contactedClients}
-                </h2>
+                </p>
               </div>
 
-              <div className="rounded-xl bg-blue-50 p-3 text-blue-500">
-                <Send size={21} />
+              <div className="rounded-xl bg-sky-50 p-3 text-sky-600">
+                <Send size={20} />
               </div>
             </div>
           </div>
 
+          {/* Replied */}
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-500">Replied</p>
-                <h2 className="mt-2 text-3xl font-semibold">
+                <p className="text-sm font-medium text-slate-500">Replied</p>
+
+                <p className="mt-2 text-3xl font-semibold text-slate-800">
                   {repliedClients}
-                </h2>
+                </p>
               </div>
 
-              <div className="rounded-xl bg-emerald-50 p-3 text-emerald-500">
-                <MessageCircle size={21} />
+              <div className="rounded-xl bg-emerald-50 p-3 text-emerald-600">
+                <MessageCircle size={20} />
               </div>
             </div>
           </div>
 
+          {/* Interested */}
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-500">Interested</p>
-                <h2 className="mt-2 text-3xl font-semibold">
+                <p className="text-sm font-medium text-slate-500">Interested</p>
+
+                <p className="mt-2 text-3xl font-semibold text-slate-800">
                   {interestedClients}
-                </h2>
+                </p>
               </div>
 
-              <div className="rounded-xl bg-rose-50 p-3 text-rose-500">
-                <Heart size={21} />
+              <div className="rounded-xl bg-amber-50 p-3 text-amber-600">
+                <Heart size={20} />
               </div>
             </div>
           </div>

@@ -1,166 +1,176 @@
 import React from "react";
-import { CalendarDays, Clock, AlertCircle } from "lucide-react";
+import {
+  CalendarDays,
+  Clock,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
 
 const FollowUpSection = ({ clients, onViewClient }) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
 
-    const getFollowUpDate = (date) => {
-        if (!date) return null;
+  const getFollowUpDate = (date) => {
+    if (!date) return null;
 
-        const followUp = new Date(date + "T00:00:00");
-        followUp.setHours(0, 0, 0, 0);
+    const followUp = new Date(date + "T00:00:00");
+    followUp.setHours(0, 0, 0, 0);
 
-        return followUp;
-    };
+    return followUp;
+  };
 
-    const overdueClients = clients.filter((client) => {
-        const date = getFollowUpDate(client.followUpDate);
-        return date && date < today;
-    });
+  // Only show active leads in follow-ups
+  const activeClients = clients.filter(
+    (client) =>
+      client.status !== "Not Interested" &&
+      client.status !== "Client",
+  );
 
-    const todayClients = clients.filter((client) => {
-        const date = getFollowUpDate(client.followUpDate);
-        return date && date.getTime() === today.getTime();
-    });
+  const overdueClients = activeClients.filter((client) => {
+    const date = getFollowUpDate(client.followUpDate);
+    return date && date < today;
+  });
 
-    const tomorrowClients = clients.filter((client) => {
-        const date = getFollowUpDate(client.followUpDate);
-        return date && date.getTime() === tomorrow.getTime();
-    });
+  const todayClients = activeClients.filter((client) => {
+    const date = getFollowUpDate(client.followUpDate);
+    return date && date.getTime() === today.getTime();
+  });
 
-    const renderClient = (client) => (
-        <button
-            key={client.id}
-            onClick={() => onViewClient(client)}
-            className="flex w-full items-center justify-between rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-left transition hover:border-indigo-200 hover:bg-indigo-50"
-        >
-            <div>
-                <p className="text-sm font-medium text-slate-800">
-                    {client.name}
-                </p>
+  const tomorrowClients = activeClients.filter((client) => {
+    const date = getFollowUpDate(client.followUpDate);
+    return date && date.getTime() === tomorrow.getTime();
+  });
 
-                <p className="mt-1 text-xs text-slate-500">
-                    {client.company || "No company"}
-                </p>
+  const renderClient = (client) => (
+    <button
+      key={client.id}
+      onClick={() => onViewClient(client)}
+      className="flex w-full items-center justify-between rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-left transition hover:border-indigo-200 hover:bg-indigo-50"
+    >
+      <div className="min-w-0">
+        <p className="truncate text-sm font-medium text-slate-800">
+          {client.name}
+        </p>
+
+        <p className="mt-1 truncate text-xs text-slate-500">
+          {client.company || "No company"}
+        </p>
+      </div>
+
+      <span className="ml-4 shrink-0 text-xs font-medium text-indigo-600">
+        {client.followUpDate}
+      </span>
+    </button>
+  );
+
+  const renderEmpty = (message) => (
+    <div className="flex min-h-[100px] items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4">
+      <p className="text-sm text-slate-400">{message}</p>
+    </div>
+  );
+
+  return (
+    <section className="mt-10">
+      {/* Section Header */}
+      <div className="mb-5">
+        <h2 className="text-xl font-semibold text-slate-800">
+          Follow-ups
+        </h2>
+
+        <p className="mt-1 text-sm text-slate-500">
+          Stay on top of your upcoming and overdue conversations.
+        </p>
+      </div>
+
+      {/* Follow-up Cards */}
+      <div className="grid gap-4 lg:grid-cols-3">
+        {/* Overdue */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <AlertCircle size={18} className="text-red-500" />
+
+              <h3 className="font-medium text-slate-800">
+                Overdue
+              </h3>
             </div>
 
-            <span className="text-xs text-indigo-600">
-                {client.followUpDate}
+            <span className="rounded-full bg-red-50 px-2.5 py-1 text-xs font-medium text-red-600">
+              {overdueClients.length}
             </span>
-        </button>
-    );
+          </div>
 
-    return (
-        <div className="mt-8">
-            <div className="mb-4">
-                <h2 className="text-xl font-semibold text-slate-800">
-                    Follow-ups
-                </h2>
-
-                <p className="mt-1 text-sm text-slate-500">
-                    Keep track of your upcoming and overdue follow-ups.
-                </p>
-            </div>
-
-            <div className="grid gap-4 lg:grid-cols-3">
-
-                {/* Overdue */}
-                <div className="rounded-2xl border border-rose-100 bg-white p-5 shadow-sm">
-                    <div className="mb-4 flex items-center gap-3">
-                        <div className="rounded-xl bg-rose-50 p-2.5 text-rose-500">
-                            <AlertCircle size={19} />
-                        </div>
-
-                        <div>
-                            <h3 className="font-semibold text-slate-800">
-                                Overdue
-                            </h3>
-
-                            <p className="text-xs text-slate-500">
-                                {overdueClients.length} follow-up
-                                {overdueClients.length !== 1 && "s"}
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="space-y-2">
-                        {overdueClients.length > 0 ? (
-                            overdueClients.map(renderClient)
-                        ) : (
-                            <p className="text-sm text-slate-400">
-                                No overdue follow-ups.
-                            </p>
-                        )}
-                    </div>
-                </div>
-
-                {/* Today */}
-                <div className="rounded-2xl border border-indigo-100 bg-white p-5 shadow-sm">
-                    <div className="mb-4 flex items-center gap-3">
-                        <div className="rounded-xl bg-indigo-50 p-2.5 text-indigo-500">
-                            <CalendarDays size={19} />
-                        </div>
-
-                        <div>
-                            <h3 className="font-semibold text-slate-800">
-                                Today
-                            </h3>
-
-                            <p className="text-xs text-slate-500">
-                                {todayClients.length} follow-up
-                                {todayClients.length !== 1 && "s"}
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="space-y-2">
-                        {todayClients.length > 0 ? (
-                            todayClients.map(renderClient)
-                        ) : (
-                            <p className="text-sm text-slate-400">
-                                No follow-ups today.
-                            </p>
-                        )}
-                    </div>
-                </div>
-
-                {/* Tomorrow */}
-                <div className="rounded-2xl border border-blue-100 bg-white p-5 shadow-sm">
-                    <div className="mb-4 flex items-center gap-3">
-                        <div className="rounded-xl bg-blue-50 p-2.5 text-blue-500">
-                            <Clock size={19} />
-                        </div>
-
-                        <div>
-                            <h3 className="font-semibold text-slate-800">
-                                Tomorrow
-                            </h3>
-
-                            <p className="text-xs text-slate-500">
-                                {tomorrowClients.length} follow-up
-                                {tomorrowClients.length !== 1 && "s"}
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="space-y-2">
-                        {tomorrowClients.length > 0 ? (
-                            tomorrowClients.map(renderClient)
-                        ) : (
-                            <p className="text-sm text-slate-400">
-                                No follow-ups tomorrow.
-                            </p>
-                        )}
-                    </div>
-                </div>
-
-            </div>
+          <div className="space-y-2">
+            {overdueClients.length > 0
+              ? overdueClients.map(renderClient)
+              : renderEmpty("No overdue follow-ups")}
+          </div>
         </div>
-    );
+
+        {/* Today */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CalendarDays size={18} className="text-indigo-500" />
+
+              <h3 className="font-medium text-slate-800">
+                Today
+              </h3>
+            </div>
+
+            <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-600">
+              {todayClients.length}
+            </span>
+          </div>
+
+          <div className="space-y-2">
+            {todayClients.length > 0
+              ? todayClients.map(renderClient)
+              : renderEmpty("No follow-ups today")}
+          </div>
+        </div>
+
+        {/* Tomorrow */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Clock size={18} className="text-amber-500" />
+
+              <h3 className="font-medium text-slate-800">
+                Tomorrow
+              </h3>
+            </div>
+
+            <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-600">
+              {tomorrowClients.length}
+            </span>
+          </div>
+
+          <div className="space-y-2">
+            {tomorrowClients.length > 0
+              ? tomorrowClients.map(renderClient)
+              : renderEmpty("No follow-ups tomorrow")}
+          </div>
+        </div>
+      </div>
+
+      {/* No Follow-ups At All */}
+      {overdueClients.length === 0 &&
+        todayClients.length === 0 &&
+        tomorrowClients.length === 0 && (
+          <div className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-slate-50 py-3">
+            <CheckCircle2 size={16} className="text-slate-400" />
+
+            <p className="text-xs text-slate-400">
+              You're all caught up. No follow-ups need your attention.
+            </p>
+          </div>
+        )}
+    </section>
+  );
 };
 
 export default FollowUpSection;
